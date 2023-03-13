@@ -14,6 +14,7 @@ specifiers:
   dotenv: ^16.0.3
   esno: ^0.16.3
   express: ^4.18.2
+  express-jwt: ^7.7.5
   express-swagger-generator: ^1.1.17
   express-ws: ^5.0.2
   jsonwebtoken: ^8.5.1
@@ -40,6 +41,7 @@ devDependencies:
   dotenv: 16.0.3
   esno: 0.16.3
   express: 4.18.2
+  express-jwt: 7.7.7
   express-swagger-generator: 1.1.17
   express-ws: 5.0.2_express@4.18.2
   jsonwebtoken: 8.5.1
@@ -810,6 +812,15 @@ packages:
     engines: {node: '>= 0.6'}
     dev: true
 
+  /express-jwt/7.7.7:
+    resolution: {integrity: sha512-7s04HZ7sAahx7lwKU5AInhVon1kWVitRFxd7cGUKQaLDOQJsAQjB/OEBXaN0GS22RBgX75TjOJXGY7myQmVz5A==}
+    engines: {node: '>= 8.0.0'}
+    dependencies:
+      '@types/jsonwebtoken': 8.5.9
+      express-unless: 2.1.3
+      jsonwebtoken: 8.5.1
+    dev: true
+
   /express-swagger-generator/1.1.17:
     resolution: {integrity: sha512-eKB2cR3TcvmSepkqjm9sFPqPAV7PQawyc3Df2p9/0vN4Q7LyBrLLpechH246YYJ1kIDPa8RresfhJeIHg5zS4A==}
     dependencies:
@@ -829,6 +840,10 @@ packages:
       express: 4.18.2
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /express-unless/2.1.3:
+    resolution: {integrity: sha512-wj4tLMyCVYuIIKHGt0FhCtIViBcwzWejX0EjNxveAa6dG+0XBCQhMbx+PnkLkFCxLC69qoFrxds4pIyL88inaQ==}
     dev: true
 
   /express-ws/5.0.2_express@4.18.2:

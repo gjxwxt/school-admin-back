@@ -14,6 +14,10 @@ queryTable(user);
 import {
   login,
   register,
+  getMenu,
+  getButton,
+  getUserList,
+  epxortUsers,
   updateList,
   deleteList,
   searchPage,
@@ -29,6 +33,22 @@ app.post("/login", (req, res) => {
 app.post("/register", (req, res) => {
   register(req, res);
 });
+
+app.post("/user/list", (req, res) => {
+  getUserList(req,  res)
+});
+
+app.post("/user/export", (req, res) => {
+  epxortUsers(req,  res)
+})
+
+app.get("/menu/list", (req, res) => {
+  getMenu(req, res);
+});
+
+app.get("/auth/buttons", (req, res) => {
+  getButton(req, res)
+})
 
 app.put("/updateList/:id", (req, res) => {
   updateList(req, res);
@@ -77,6 +97,16 @@ app.ws("/socket", function (ws, req) {
         "YYYY年MM月DD日HH时mm分ss秒"
       )}接收到客户端发送的信息，服务端返回信息：${msg}`
     );
+  });
+});
+
+app.use((err, req, res, next) => {
+  if (err.name === "UnauthorizedError") {
+    return res.send({ status: 401, message: "无效的token" });
+  }
+  res.send({
+    code: 500,
+    msg: "服务器错误",
   });
 });
 

@@ -9,14 +9,19 @@ import getFormatDate from "../utils/date";
 import { connection } from "../utils/mysql";
 import { Request, Response } from "express";
 import { createMathExpr } from "svg-captcha";
+import * as path from "path";
+import {error} from "winston";
+import {getIdentityMenu} from "../utils/identity";
+const authButtons = require("../json/authButtons");
+
 
 const utils = require("@pureadmin/utils");
 
 /** 保存验证码 */
 let generateVerify: number;
 
-/** 过期时间 单位：毫秒 默认 1分钟过期，方便演示 */
-let expiresIn = 60000;
+/** 过期时间 单位：毫秒 默认 24h分钟过期，方便演示 */
+let expiresIn = 86400000;
 
 /**
  * @typedef Error
@@ -56,29 +61,28 @@ let expiresIn = 60000;
  */
 
 const login = async (req: Request, res: Response) => {
-  // const { username, password, verify } = req.body;
-  // if (generateVerify !== verify) return res.json({
-  //   success: false,
-  // data: {
-  //   message: Message[0];
-  // }
-  // })
+  /** 登录传进来的一定是md5加密过的数据*/
   const { username, password } = req.body;
   let sql: string =
     "select * from users where username=" + "'" + username + "'";
   connection.query(sql, async function (err, data: any) {
+    /** 没找到登陆时输入的用户*/
     if (data.length == 0) {
       await res.json({
+        code: 500,
         success: false,
+        msg: "当前用户名未注册",
         data: { message: Message[1] },
       });
     } else {
       if (
-        createHash("md5").update(password).digest("hex") == data[0].password
+          /** 因为前端传过来的就是md5加密过的密码，所以验证不需要解密，如果密码和数据库中的md5加密过的数据相同，即登陆成功*/
+          password == data[0].password
       ) {
         const accessToken = jwt.sign(
           {
-            accountId: data[0].id,
+            accountId: data[0].username,
+            role: data[0].role
           },
           secret.jwtSecret,
           { expiresIn }
@@ -91,13 +95,10 @@ const login = async (req: Request, res: Response) => {
               username,
               // 这里模拟角色，根据自己需求修改
               roles: ["admin"],
-              accessToken,
+              access_token: accessToken,
               // 这里模拟刷新token，根据自己需求修改
               refreshToken: "eyJhbGciOiJIUzUxMiJ9.adminRefresh",
-              expires: new Date(new Date()).getTime() + expiresIn,
-              // 这个标识是真实后端返回的接口，只是为了演示
-              pureAdminBackend:
-                "这个标识是pure-admin-backend真实后端返回的接口，只是为了演示",
+              expires: new Date(new Date()).getTime() + expiresIn
             },
           });
         } else {
@@ -107,20 +108,20 @@ const login = async (req: Request, res: Response) => {
               message: Message[2],
               username,
               // 这里模拟角色，根据自己需求修改
-              roles: ["common"],
-              accessToken,
+              roles: [data[0].role],
+              access_token: accessToken,
               // 这里模拟刷新token，根据自己需求修改
               refreshToken: "eyJhbGciOiJIUzUxMiJ9.adminRefresh",
-              expires: new Date(new Date()).getTime() + expiresIn,
-              // 这个标识是真实后端返回的接口，只是为了演示
-              pureAdminBackend:
-                "这个标识是pure-admin-backend真实后端返回的接口，只是为了演示",
+              expires: new Date(new Date()).getTime() + expiresIn
             },
           });
         }
       } else {
+        /** 密码错误 */
         await res.json({
+          code: 500,
           success: false,
+          msg: "密码错误",
           data: { message: Message[3] },
         });
       }
@@ -155,18 +156,14 @@ const login = async (req: Request, res: Response) => {
  */
 
 const register = async (req: Request, res: Response) => {
-  // const { username, password, verify } = req.body;
-  const { username, password } = req.body;
-  // if (generateVerify !== verify)
-  //   return res.json({
-  //     success: false,
-  //     data: { message: Message[0] },
-  //   });
+  const { username, password, role } = req.body;
+  /** 如果密码长度小于6*/
   if (password.length < 6)
     return res.json({
       success: false,
       data: { message: Message[4] },
     });
+  /** 看看username是否被注册了*/
   let sql: string =
     "select * from users where username=" + "'" + username + "'";
   connection.query(sql, async (err, data: any) => {
@@ -176,22 +173,10 @@ const register = async (req: Request, res: Response) => {
         data: { message: Message[5] },
       });
     } else {
-      let time = await getFormatDate();
-      let sql: string =
-        "insert into users (username,password,time) value(" +
-        "'" +
-        username +
-        "'" +
-        "," +
-        "'" +
-        createHash("md5").update(password).digest("hex") +
-        "'" +
-        "," +
-        "'" +
-        time +
-        "'" +
-        ")";
-      connection.query(sql, async function (err) {
+      /** 没人注册且密码长度>6时进行注册，判断前端传过来的数据是不是md5加密过的，所以直接存入数据库*/
+      let sql: string = `insert into users (username,password,role) value (?,?,?)`;
+      let newPassword = password.length >=32 ? password : createHash("md5").update(password).digest("hex");
+      connection.query(sql, [username,newPassword,role],async function (err) {
         if (err) {
           Logger.error(err);
         } else {
@@ -204,6 +189,238 @@ const register = async (req: Request, res: Response) => {
     }
   });
 };
+
+// 获取菜单列表，根据登录人员的身份返回数据。后面的接口中可以根据token来判断身份，进而返回不同内容
+const getMenu = async (req: any, res: Response) => {
+  let identity = req.auth.role;
+  // 不同身份的人返回不同的路由页面
+  res.send(await getIdentityMenu(identity))
+}
+const getButton = async (req: Request, res: Response) => {
+  res.send(authButtons)
+}
+
+const getUserList = async (req: Request, res: Response) => {
+  let users = {
+    "code": 200,
+    "msg": "成功",
+    "data": {
+      "list": [
+        {
+          "id": "568668428175172767",
+          "username": "陆娟",
+          "campus": 2,
+          "user": {
+            "detail": {
+              "age": 26,
+            }
+          },
+          "age": 26,
+          "classHour": "120",
+          "email": "t.lxmxre@crsspeoqg.td",
+          "className": "101",
+          "createTime": "2019-08-22 06:09:02",
+          "status": 0,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+        },
+        {
+          "id": "864359270394668547",
+          "username": "吕霞",
+          "campus": 2,
+          "user": {
+            "detail": {
+              "age": 23
+            }
+          },
+          "age": 23,
+          "classHour": "123",
+          "email": "p.rklwowgt@eitwlefs.ph",
+          "className": "101",
+          "createTime": "1984-01-14 22:33:44",
+          "status": 1,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+        },
+        {
+          "id": "630412577603789220",
+          "username": "尹刚",
+          "campus": 1,
+          "user": {
+            "detail": {
+              "age": 26
+            }
+          },
+          "age": 26,
+          "classHour": "123",
+          "email": "y.qhoaepzq@jcrkcdc.gy",
+          "className": "102",
+          "createTime": "2022-01-29 01:43:10",
+          "status": 1,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRqMK.jpg"
+        },
+        {
+          "id": "553812343145788464",
+          "username": "毛桂英",
+          "campus": 1,
+          "user": {
+            "detail": {
+              "age": 22
+            }
+          },
+          "age": 22,
+          "classHour": "123",
+          "email": "x.urmqegv@kecbm.gm",
+          "className": "102",
+          "createTime": "1985-02-19 14:21:44",
+          "status": 0,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRqMK.jpg"
+        },
+        {
+          "id": "292574518261001683",
+          "username": "许娜",
+          "campus": 1,
+          "user": {
+            "detail": {
+              "age": 12
+            }
+          },
+          "age": 12,
+          "classHour": "123",
+          "email": "z.lmdoffxf@uvsiqubcvw.gn",
+          "className": "101",
+          "createTime": "1984-12-21 14:57:03",
+          "status": 1,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRqMK.jpg"
+        },
+        {
+          "id": "664369828507435489",
+          "username": "邓秀兰",
+          "campus": 2,
+          "user": {
+            "detail": {
+              "age": 19
+            }
+          },
+          "age": 19,
+          "classHour": "123",
+          "email": "i.inrajkwcj@csknklk.ni",
+          "className": "101",
+          "createTime": "2012-10-28 18:24:58",
+          "status": 0,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRqMK.jpg"
+        },
+        {
+          "id": "775133483698306865",
+          "username": "侯娟",
+          "campus": 2,
+          "user": {
+            "detail": {
+              "age": 21
+            }
+          },
+          "age": 21,
+          "classHour": "123",
+          "email": "p.pfzikttpi@hkwhmad.gw",
+          "className": "101",
+          "createTime": "2017-07-30 19:54:06",
+          "status": 0,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+        },
+        {
+          "id": "424339324332823816",
+          "username": "刘超",
+          "campus": 1,
+          "user": {
+            "detail": {
+              "age": 18
+            }
+          },
+          "age": 18,
+          "classHour": "123",
+          "email": "e.hemdj@xdqmw.vc",
+          "className": "101",
+          "createTime": "1986-04-16 11:26:50",
+          "status": 1,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRa0s.jpg"
+        },
+        {
+          "id": "661764073433891321",
+          "username": "罗平",
+          "campus": 1,
+          "user": {
+            "detail": {
+              "age": 11
+            }
+          },
+          "age": 11,
+          "classHour": "123",
+          "email": "v.qenmvyhg@qqv.mn",
+          "className": "102",
+          "createTime": "1984-02-02 04:17:57",
+          "status": 0,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+        },
+        {
+          "id": "408651339919580773",
+          "username": "郑丽",
+          "campus": 2,
+          "user": {
+            "detail": {
+              "age": 24
+            }
+          },
+          "age": 24,
+          "classHour": "123",
+          "email": "b.sbjq@prnamtncpt.wf",
+          "className": "101",
+          "createTime": "1999-03-06 05:12:50",
+          "status": 1,
+          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+        }
+      ],
+      "pageNum": 1,
+      "pageSize": 10,
+      "total": 2000
+    }
+  };
+  res.send(users)
+}
+// 有个注意的点就是，尽量不要层级太深，非得user.detail.age才能拿到age
+const epxortUsers = async (req, res) => {
+  let arr = [
+    {
+      "id": "568668428175172767",
+      "username": "陆娟",
+      "gender": 2,
+      "user": {
+        "detail": {
+          "age": 26
+        }
+      },
+      "idCard": "568668428175172767",
+      "email": "t.lxmxre@crsspeoqg.td",
+      "address": "云南省 楚雄彝族自治州",
+      "createTime": "2019-08-22 06:09:02",
+      "status": 0,
+      "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+    },{
+      "id": "568668428175172767",
+      "username": "陆娟",
+      "gender": 2,
+      "user": {
+        "detail": {
+          "age": 26
+        }
+      },
+      "idCard": "568668428175172767",
+      "email": "t.lxmxre@crsspeoqg.td",
+      "address": "云南省 楚雄彝族自治州",
+      "createTime": "2019-08-22 06:09:02",
+      "status": 0,
+      "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+    }];
+  res.send(arr)
+}
+
 
 /**
  * @typedef UpdateList
@@ -461,6 +678,10 @@ const captcha = async (req: Request, res: Response) => {
 export {
   login,
   register,
+  getMenu,
+  getButton,
+  getUserList,
+  epxortUsers,
   updateList,
   deleteList,
   searchPage,

@@ -1,6 +1,8 @@
 import * as express from "express";
 import * as expressWs from "express-ws";
 import * as bodyParser from "body-parser";
+import {expressjwt} from "express-jwt";
+import secret from "./config";
 
 class App {
   public app;
@@ -21,6 +23,23 @@ class App {
     );
     // 设置静态访问目录(Swagger)
     this.app.use(express.static("public"));
+    // token验证,登录接口不需要token，其他都带着,使用这个中间件，会在以后的use中的req中注入auth，是解析后的token
+    this.app.use(
+        expressjwt({
+          secret: secret.jwtSecret,
+          algorithms: ["HS256"]
+        }).unless({
+          path: [
+            "/login",
+            "/register",
+            "/homeproduct",
+            "/category",
+            /^\/category\/.*/,
+            "/comingshop",
+            /^\/detail\/.*/,
+          ],
+        })
+    );
     // 设置跨域访问
     this.app.all("*", (req, res, next) => {
       res.header("Access-Control-Allow-Origin", "*");
