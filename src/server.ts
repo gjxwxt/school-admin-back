@@ -4,12 +4,20 @@ import config from "./config";
 import * as dayjs from "dayjs";
 import * as multer from "multer";
 import { user } from "./models/mysql";
+import {schedule, campus, teachers, classroom, AuditionTable, classManage} from "./models/mysql/schedule"
 import Logger from "./loaders/logger";
-import { queryTable } from "./utils/mysql";
+import { queryTable,queryTableUser } from "./utils/mysql";
 const expressSwagger = require("express-swagger-generator")(app);
 expressSwagger(config.options);
 
-queryTable(user);
+queryTableUser(user);
+queryTable(schedule);
+queryTable(campus);
+queryTable(classroom);
+queryTable(teachers);
+queryTable(classManage);
+queryTable(AuditionTable);
+
 
 import {
   login,
@@ -24,7 +32,32 @@ import {
   searchVague,
   upload,
   captcha,
-} from "./router/http";
+} from "./handle/login";
+import {
+  addNewsSchedule,
+  deleteSchedule,
+  editSchedule, searchOneDaySchedule,
+  searchSchedule,
+  searchWeekSchedule,
+  useLastWeekSchedule
+} from "./handle/schedule";
+import {addCampus, deleteCampus, editCampus, searchCampus} from "./handle/campus";
+import {addTeacher, deleteTeacher, editTeacher, searchTeacher, searchTeacherByCategory} from "./handle/teachers";
+import {addClassRoom, deleteClassRoom, editClassRoom, searchClassRoom} from "./handle/classroom";
+import {
+  addAuditionTable,
+  countRatio,
+  deleteAuditionTable,
+  editAuditionTable,
+  searchAuditionTable
+} from "./handle/AuditionTable";
+import {
+  addClassManage,
+  deleteClassManage,
+  editClassManage,
+  searchClassManage,
+  searchClassName
+} from "./handle/classMangage";
 
 app.post("/login", (req, res) => {
   login(req, res);
@@ -66,6 +99,102 @@ app.post("/searchVague", (req, res) => {
   searchVague(req, res);
 });
 
+// 课程相关
+app.post("/schedule/addNews", (req, res) => {
+  addNewsSchedule(req, res);
+});
+app.post("/schedule/search", (req, res) => {
+  searchSchedule(req, res);
+});
+app.post("/schedule/searchOneDay", (req, res) => {
+  searchOneDaySchedule(req, res);
+});
+app.post("/schedule/edit", (req, res) => {
+  editSchedule(req, res);
+});
+app.post("/schedule/delete", (req, res) => {
+  deleteSchedule(req, res);
+});
+app.post("/schedule/batch", (req, res) => {
+  useLastWeekSchedule(req, res);
+});
+app.post("/schedule/export", (req, res) => {
+  searchWeekSchedule(req, res);
+});
+//校区相关
+app.post("/campus/addCampus", (req, res) => {
+  addCampus(req, res);
+});
+app.post("/campus/search", (req, res) => {
+  searchCampus(req, res);
+});
+app.post("/campus/edit", (req, res) => {
+  editCampus(req, res);
+});
+app.post("/campus/delete", (req, res) => {
+  deleteCampus(req, res);
+});
+// 教室相关
+app.post("/classroom/add", (req, res) => {
+  addClassRoom(req, res);
+});
+app.post("/classroom/search", (req, res) => {
+  searchClassRoom(req, res);
+});
+app.post("/classroom/edit", (req, res) => {
+  editClassRoom(req, res);
+});
+app.post("/classroom/delete", (req, res) => {
+  deleteClassRoom(req, res);
+});
+// 教师相关
+app.post("/teacher/add", (req, res) => {
+  addTeacher(req, res);
+});
+app.post("/teacher/search", (req, res) => {
+  searchTeacher(req, res);
+});
+app.post("/teacher/edit", (req, res) => {
+  editTeacher(req, res);
+});
+app.post("/teacher/delete", (req, res) => {
+  deleteTeacher(req, res);
+});
+app.post("/teacher/searchTeacherByCategory", (req, res) => {
+  searchTeacherByCategory(req, res);
+});
+// 班级相关
+app.post("/classManage/add", (req, res) => {
+  addClassManage(req, res);
+});
+app.post("/classManage/search", (req, res) => {
+  searchClassManage(req, res);
+});
+app.post("/classManage/searchName", (req, res) => {
+  searchClassName(req, res);
+});
+app.post("/classManage/edit", (req, res) => {
+  editClassManage(req, res);
+});
+app.post("/classManage/delete", (req, res) => {
+  deleteClassManage(req, res);
+});
+// 试听相关addAuditionTable
+app.post("/auditiontable/add", (req, res) => {
+  addAuditionTable(req, res);
+});
+app.post("/auditiontable/search", (req, res) => {
+  searchAuditionTable(req, res);
+});
+app.post("/auditiontable/edit", (req, res) => {
+  editAuditionTable(req, res);
+});
+app.post("/auditiontable/delete", (req, res) => {
+  deleteAuditionTable(req, res);
+});
+app.post("/auditiontable/countRatio", (req, res) => {
+  countRatio(req, res);
+});
 // 新建存放临时文件的文件夹
 const upload_tmp = multer({ dest: "upload_tmp/" });
 app.post("/upload", upload_tmp.any(), (req, res) => {
