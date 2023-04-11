@@ -1,9 +1,3 @@
-<p align="center">
-pure-admin官方后端 
-<br />
-采用nodejs编写
-</p>
-
 ## 快速启动
 
 ### 打开 `MySql`

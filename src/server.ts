@@ -4,9 +4,16 @@ import config from "./config";
 import * as dayjs from "dayjs";
 import * as multer from "multer";
 import { user } from "./models/mysql";
-import {schedule, campus, teachers, classroom, AuditionTable, classManage} from "./models/mysql/schedule"
+import {
+  schedule,
+  campus,
+  teachers,
+  classroom,
+  AuditionTable,
+  classManage,
+} from "./models/mysql/schedule";
 import Logger from "./loaders/logger";
-import { queryTable,queryTableUser } from "./utils/mysql";
+import { queryTable, queryTableUser } from "./utils/mysql";
 const expressSwagger = require("express-swagger-generator")(app);
 expressSwagger(config.options);
 
@@ -17,7 +24,6 @@ queryTable(classroom);
 queryTable(teachers);
 queryTable(classManage);
 queryTable(AuditionTable);
-
 
 import {
   login,
@@ -36,28 +42,46 @@ import {
 import {
   addNewsSchedule,
   deleteSchedule,
-  editSchedule, searchOneDaySchedule,
+  editSchedule,
+  searchOneDaySchedule,
   searchSchedule,
   searchWeekSchedule,
-  useLastWeekSchedule
+  useLastWeekSchedule,
 } from "./handle/schedule";
-import {addCampus, deleteCampus, editCampus, searchCampus} from "./handle/campus";
-import {addTeacher, deleteTeacher, editTeacher, searchTeacher, searchTeacherByCategory} from "./handle/teachers";
-import {addClassRoom, deleteClassRoom, editClassRoom, searchClassRoom} from "./handle/classroom";
+import {
+  addCampus,
+  deleteCampus,
+  editCampus,
+  searchCampus,
+} from "./handle/campus";
+import {
+  addTeacher,
+  deleteTeacher,
+  editTeacher,
+  searchTeacher,
+  searchTeacherByCategory,
+} from "./handle/teachers";
+import {
+  addClassRoom,
+  deleteClassRoom,
+  editClassRoom,
+  searchClassRoom,
+} from "./handle/classroom";
 import {
   addAuditionTable,
   countRatio,
   deleteAuditionTable,
   editAuditionTable,
-  searchAuditionTable
+  searchAuditionTable,
 } from "./handle/AuditionTable";
 import {
   addClassManage,
   deleteClassManage,
   editClassManage,
   searchClassManage,
-  searchClassName
+  searchClassName,
 } from "./handle/classMangage";
+import { getExcelTemplate, uploadExcel } from "./handle/upload";
 
 app.post("/login", (req, res) => {
   login(req, res);
@@ -68,20 +92,20 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/user/list", (req, res) => {
-  getUserList(req,  res)
+  getUserList(req, res);
 });
 
 app.post("/user/export", (req, res) => {
-  epxortUsers(req,  res)
-})
+  epxortUsers(req, res);
+});
 
 app.get("/menu/list", (req, res) => {
   getMenu(req, res);
 });
 
 app.get("/auth/buttons", (req, res) => {
-  getButton(req, res)
-})
+  getButton(req, res);
+});
 
 app.put("/updateList/:id", (req, res) => {
   updateList(req, res);
@@ -120,6 +144,12 @@ app.post("/schedule/batch", (req, res) => {
 });
 app.post("/schedule/export", (req, res) => {
   searchWeekSchedule(req, res);
+});
+app.post("/schedule/getExcelTemplate", (req, res) => {
+  getExcelTemplate(req, res);
+});
+app.post("/file/upload/excel", (req, res) => {
+  uploadExcel(req, res);
 });
 //校区相关
 app.post("/campus/addCampus", (req, res) => {

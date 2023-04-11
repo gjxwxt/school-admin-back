@@ -10,10 +10,9 @@ import { connection } from "../utils/mysql";
 import { Request, Response } from "express";
 import { createMathExpr } from "svg-captcha";
 import * as path from "path";
-import {error} from "winston";
-import {getIdentityMenu} from "../utils/identity";
+import { error } from "winston";
+import { getIdentityMenu } from "../utils/identity";
 const authButtons = require("../json/authButtons");
-
 
 const utils = require("@pureadmin/utils");
 
@@ -76,13 +75,13 @@ const login = async (req: Request, res: Response) => {
       });
     } else {
       if (
-          /** 因为前端传过来的就是md5加密过的密码，所以验证不需要解密，如果密码和数据库中的md5加密过的数据相同，即登陆成功*/
-          password == data[0].password
+        /** 因为前端传过来的就是md5加密过的密码，所以验证不需要解密，如果密码和数据库中的md5加密过的数据相同，即登陆成功*/
+        password == data[0].password
       ) {
         const accessToken = jwt.sign(
           {
             accountId: data[0].username,
-            role: data[0].role
+            role: data[0].role,
           },
           secret.jwtSecret,
           { expiresIn }
@@ -98,7 +97,7 @@ const login = async (req: Request, res: Response) => {
               access_token: accessToken,
               // 这里模拟刷新token，根据自己需求修改
               refreshToken: "eyJhbGciOiJIUzUxMiJ9.adminRefresh",
-              expires: new Date(new Date()).getTime() + expiresIn
+              expires: new Date(new Date()).getTime() + expiresIn,
             },
           });
         } else {
@@ -112,7 +111,7 @@ const login = async (req: Request, res: Response) => {
               access_token: accessToken,
               // 这里模拟刷新token，根据自己需求修改
               refreshToken: "eyJhbGciOiJIUzUxMiJ9.adminRefresh",
-              expires: new Date(new Date()).getTime() + expiresIn
+              expires: new Date(new Date()).getTime() + expiresIn,
             },
           });
         }
@@ -175,17 +174,24 @@ const register = async (req: Request, res: Response) => {
     } else {
       /** 没人注册且密码长度>6时进行注册，判断前端传过来的数据是不是md5加密过的，所以直接存入数据库*/
       let sql: string = `insert into users (username,password,role) value (?,?,?)`;
-      let newPassword = password.length >=32 ? password : createHash("md5").update(password).digest("hex");
-      connection.query(sql, [username,newPassword,role],async function (err) {
-        if (err) {
-          Logger.error(err);
-        } else {
-          await res.json({
-            success: true,
-            data: { message: Message[6] },
-          });
+      let newPassword =
+        password.length >= 32
+          ? password
+          : createHash("md5").update(password).digest("hex");
+      connection.query(
+        sql,
+        [username, newPassword, role],
+        async function (err) {
+          if (err) {
+            Logger.error(err);
+          } else {
+            await res.json({
+              success: true,
+              data: { message: Message[6] },
+            });
+          }
         }
-      });
+      );
     }
   });
 };
@@ -194,233 +200,234 @@ const register = async (req: Request, res: Response) => {
 const getMenu = async (req: any, res: Response) => {
   let identity = req.auth.role;
   // 不同身份的人返回不同的路由页面
-  res.send(await getIdentityMenu(identity))
-}
+  res.send(await getIdentityMenu(identity));
+};
 const getButton = async (req: Request, res: Response) => {
-  res.send(authButtons)
-}
+  res.send(authButtons);
+};
 
 const getUserList = async (req: Request, res: Response) => {
   let users = {
-    "code": 200,
-    "msg": "成功",
-    "data": {
-      "list": [
+    code: 200,
+    msg: "成功",
+    data: {
+      list: [
         {
-          "id": "568668428175172767",
-          "username": "陆娟",
-          "campus": 2,
-          "user": {
-            "detail": {
-              "age": 26,
-            }
+          id: "568668428175172767",
+          username: "陆娟",
+          campus: 2,
+          user: {
+            detail: {
+              age: 26,
+            },
           },
-          "age": 26,
-          "classHour": "120",
-          "email": "t.lxmxre@crsspeoqg.td",
-          "className": "101",
-          "createTime": "2019-08-22 06:09:02",
-          "status": 0,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+          age: 26,
+          classHour: "120",
+          email: "t.lxmxre@crsspeoqg.td",
+          className: "101",
+          createTime: "2019-08-22 06:09:02",
+          status: 0,
+          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
         },
         {
-          "id": "864359270394668547",
-          "username": "吕霞",
-          "campus": 2,
-          "user": {
-            "detail": {
-              "age": 23
-            }
+          id: "864359270394668547",
+          username: "吕霞",
+          campus: 2,
+          user: {
+            detail: {
+              age: 23,
+            },
           },
-          "age": 23,
-          "classHour": "123",
-          "email": "p.rklwowgt@eitwlefs.ph",
-          "className": "101",
-          "createTime": "1984-01-14 22:33:44",
-          "status": 1,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+          age: 23,
+          classHour: "123",
+          email: "p.rklwowgt@eitwlefs.ph",
+          className: "101",
+          createTime: "1984-01-14 22:33:44",
+          status: 1,
+          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
         },
         {
-          "id": "630412577603789220",
-          "username": "尹刚",
-          "campus": 1,
-          "user": {
-            "detail": {
-              "age": 26
-            }
+          id: "630412577603789220",
+          username: "尹刚",
+          campus: 1,
+          user: {
+            detail: {
+              age: 26,
+            },
           },
-          "age": 26,
-          "classHour": "123",
-          "email": "y.qhoaepzq@jcrkcdc.gy",
-          "className": "102",
-          "createTime": "2022-01-29 01:43:10",
-          "status": 1,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRqMK.jpg"
+          age: 26,
+          classHour: "123",
+          email: "y.qhoaepzq@jcrkcdc.gy",
+          className: "102",
+          createTime: "2022-01-29 01:43:10",
+          status: 1,
+          avatar: "https://i.imgtg.com/2023/01/16/QRqMK.jpg",
         },
         {
-          "id": "553812343145788464",
-          "username": "毛桂英",
-          "campus": 1,
-          "user": {
-            "detail": {
-              "age": 22
-            }
+          id: "553812343145788464",
+          username: "毛桂英",
+          campus: 1,
+          user: {
+            detail: {
+              age: 22,
+            },
           },
-          "age": 22,
-          "classHour": "123",
-          "email": "x.urmqegv@kecbm.gm",
-          "className": "102",
-          "createTime": "1985-02-19 14:21:44",
-          "status": 0,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRqMK.jpg"
+          age: 22,
+          classHour: "123",
+          email: "x.urmqegv@kecbm.gm",
+          className: "102",
+          createTime: "1985-02-19 14:21:44",
+          status: 0,
+          avatar: "https://i.imgtg.com/2023/01/16/QRqMK.jpg",
         },
         {
-          "id": "292574518261001683",
-          "username": "许娜",
-          "campus": 1,
-          "user": {
-            "detail": {
-              "age": 12
-            }
+          id: "292574518261001683",
+          username: "许娜",
+          campus: 1,
+          user: {
+            detail: {
+              age: 12,
+            },
           },
-          "age": 12,
-          "classHour": "123",
-          "email": "z.lmdoffxf@uvsiqubcvw.gn",
-          "className": "101",
-          "createTime": "1984-12-21 14:57:03",
-          "status": 1,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRqMK.jpg"
+          age: 12,
+          classHour: "123",
+          email: "z.lmdoffxf@uvsiqubcvw.gn",
+          className: "101",
+          createTime: "1984-12-21 14:57:03",
+          status: 1,
+          avatar: "https://i.imgtg.com/2023/01/16/QRqMK.jpg",
         },
         {
-          "id": "664369828507435489",
-          "username": "邓秀兰",
-          "campus": 2,
-          "user": {
-            "detail": {
-              "age": 19
-            }
+          id: "664369828507435489",
+          username: "邓秀兰",
+          campus: 2,
+          user: {
+            detail: {
+              age: 19,
+            },
           },
-          "age": 19,
-          "classHour": "123",
-          "email": "i.inrajkwcj@csknklk.ni",
-          "className": "101",
-          "createTime": "2012-10-28 18:24:58",
-          "status": 0,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRqMK.jpg"
+          age: 19,
+          classHour: "123",
+          email: "i.inrajkwcj@csknklk.ni",
+          className: "101",
+          createTime: "2012-10-28 18:24:58",
+          status: 0,
+          avatar: "https://i.imgtg.com/2023/01/16/QRqMK.jpg",
         },
         {
-          "id": "775133483698306865",
-          "username": "侯娟",
-          "campus": 2,
-          "user": {
-            "detail": {
-              "age": 21
-            }
+          id: "775133483698306865",
+          username: "侯娟",
+          campus: 2,
+          user: {
+            detail: {
+              age: 21,
+            },
           },
-          "age": 21,
-          "classHour": "123",
-          "email": "p.pfzikttpi@hkwhmad.gw",
-          "className": "101",
-          "createTime": "2017-07-30 19:54:06",
-          "status": 0,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+          age: 21,
+          classHour: "123",
+          email: "p.pfzikttpi@hkwhmad.gw",
+          className: "101",
+          createTime: "2017-07-30 19:54:06",
+          status: 0,
+          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
         },
         {
-          "id": "424339324332823816",
-          "username": "刘超",
-          "campus": 1,
-          "user": {
-            "detail": {
-              "age": 18
-            }
+          id: "424339324332823816",
+          username: "刘超",
+          campus: 1,
+          user: {
+            detail: {
+              age: 18,
+            },
           },
-          "age": 18,
-          "classHour": "123",
-          "email": "e.hemdj@xdqmw.vc",
-          "className": "101",
-          "createTime": "1986-04-16 11:26:50",
-          "status": 1,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRa0s.jpg"
+          age: 18,
+          classHour: "123",
+          email: "e.hemdj@xdqmw.vc",
+          className: "101",
+          createTime: "1986-04-16 11:26:50",
+          status: 1,
+          avatar: "https://i.imgtg.com/2023/01/16/QRa0s.jpg",
         },
         {
-          "id": "661764073433891321",
-          "username": "罗平",
-          "campus": 1,
-          "user": {
-            "detail": {
-              "age": 11
-            }
+          id: "661764073433891321",
+          username: "罗平",
+          campus: 1,
+          user: {
+            detail: {
+              age: 11,
+            },
           },
-          "age": 11,
-          "classHour": "123",
-          "email": "v.qenmvyhg@qqv.mn",
-          "className": "102",
-          "createTime": "1984-02-02 04:17:57",
-          "status": 0,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
+          age: 11,
+          classHour: "123",
+          email: "v.qenmvyhg@qqv.mn",
+          className: "102",
+          createTime: "1984-02-02 04:17:57",
+          status: 0,
+          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
         },
         {
-          "id": "408651339919580773",
-          "username": "郑丽",
-          "campus": 2,
-          "user": {
-            "detail": {
-              "age": 24
-            }
+          id: "408651339919580773",
+          username: "郑丽",
+          campus: 2,
+          user: {
+            detail: {
+              age: 24,
+            },
           },
-          "age": 24,
-          "classHour": "123",
-          "email": "b.sbjq@prnamtncpt.wf",
-          "className": "101",
-          "createTime": "1999-03-06 05:12:50",
-          "status": 1,
-          "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
-        }
+          age: 24,
+          classHour: "123",
+          email: "b.sbjq@prnamtncpt.wf",
+          className: "101",
+          createTime: "1999-03-06 05:12:50",
+          status: 1,
+          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
+        },
       ],
-      "pageNum": 1,
-      "pageSize": 10,
-      "total": 2000
-    }
+      pageNum: 1,
+      pageSize: 10,
+      total: 2000,
+    },
   };
-  res.send(users)
-}
+  res.send(users);
+};
 // 有个注意的点就是，尽量不要层级太深，非得user.detail.age才能拿到age
 const epxortUsers = async (req, res) => {
   let arr = [
     {
-      "id": "568668428175172767",
-      "username": "陆娟",
-      "gender": 2,
-      "user": {
-        "detail": {
-          "age": 26
-        }
+      id: "568668428175172767",
+      username: "陆娟",
+      gender: 2,
+      user: {
+        detail: {
+          age: 26,
+        },
       },
-      "idCard": "568668428175172767",
-      "email": "t.lxmxre@crsspeoqg.td",
-      "address": "云南省 楚雄彝族自治州",
-      "createTime": "2019-08-22 06:09:02",
-      "status": 0,
-      "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
-    },{
-      "id": "568668428175172767",
-      "username": "陆娟",
-      "gender": 2,
-      "user": {
-        "detail": {
-          "age": 26
-        }
+      idCard: "568668428175172767",
+      email: "t.lxmxre@crsspeoqg.td",
+      address: "云南省 楚雄彝族自治州",
+      createTime: "2019-08-22 06:09:02",
+      status: 0,
+      avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
+    },
+    {
+      id: "568668428175172767",
+      username: "陆娟",
+      gender: 2,
+      user: {
+        detail: {
+          age: 26,
+        },
       },
-      "idCard": "568668428175172767",
-      "email": "t.lxmxre@crsspeoqg.td",
-      "address": "云南省 楚雄彝族自治州",
-      "createTime": "2019-08-22 06:09:02",
-      "status": 0,
-      "avatar": "https://i.imgtg.com/2023/01/16/QRBHS.jpg"
-    }];
-  res.send(arr)
-}
-
+      idCard: "568668428175172767",
+      email: "t.lxmxre@crsspeoqg.td",
+      address: "云南省 楚雄彝族自治州",
+      createTime: "2019-08-22 06:09:02",
+      status: 0,
+      avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
+    },
+  ];
+  res.send(arr);
+};
 
 /**
  * @typedef UpdateList
