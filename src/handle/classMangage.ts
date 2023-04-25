@@ -29,7 +29,7 @@ export async function  addClassManage(req: any, res: Response) {
 export async function searchClassName(req: any, res: Response) {
     const { campus } = req.body;
     connection.query(
-        `select class_name,teacher1_name,teacher2_name from classManage where campus = ? order by create_time desc`,
+        `select class_id,class_name,teacher1_name,teacher2_name from classManage where campus = ? order by create_time desc`,
         [campus],
         async function (err,result){
             if (err){

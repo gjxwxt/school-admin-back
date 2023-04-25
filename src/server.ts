@@ -11,6 +11,9 @@ import {
   classroom,
   AuditionTable,
   classManage,
+  student,
+  contract,
+  classHour_operate,
 } from "./models/mysql/schedule";
 import Logger from "./loaders/logger";
 import { queryTable, queryTableUser } from "./utils/mysql";
@@ -24,6 +27,9 @@ queryTable(classroom);
 queryTable(teachers);
 queryTable(classManage);
 queryTable(AuditionTable);
+queryTable(student);
+queryTable(contract);
+queryTable(classHour_operate);
 
 import {
   login,
@@ -44,7 +50,7 @@ import {
   deleteSchedule,
   editSchedule,
   searchOneDaySchedule,
-  searchSchedule,
+  searchTodaySchedule,
   searchWeekSchedule,
   useLastWeekSchedule,
 } from "./handle/schedule";
@@ -82,6 +88,13 @@ import {
   searchClassName,
 } from "./handle/classMangage";
 import { getExcelTemplate, uploadExcel } from "./handle/upload";
+import {
+  addStudent,
+  deleteStudent,
+  editStudent, getStudentByClassId,
+  searchStudent,
+} from "./handle/students";
+import {operateClassHour, searchClassHourOperate} from "./handle/class_hour";
 
 app.post("/login", (req, res) => {
   login(req, res);
@@ -128,7 +141,8 @@ app.post("/schedule/addNews", (req, res) => {
   addNewsSchedule(req, res);
 });
 app.post("/schedule/search", (req, res) => {
-  searchSchedule(req, res);
+  // searchSchedule(req, res);
+  searchTodaySchedule(req, res);
 });
 app.post("/schedule/searchOneDay", (req, res) => {
   searchOneDaySchedule(req, res);
@@ -209,6 +223,13 @@ app.post("/classManage/edit", (req, res) => {
 app.post("/classManage/delete", (req, res) => {
   deleteClassManage(req, res);
 });
+// 课时相关
+app.post("/classHour/operate", (req, res) => {
+  operateClassHour(req, res);
+});
+app.post("/classHour/search", (req, res) => {
+  searchClassHourOperate(req, res);
+});
 // 试听相关addAuditionTable
 app.post("/auditiontable/add", (req, res) => {
   addAuditionTable(req, res);
@@ -224,6 +245,22 @@ app.post("/auditiontable/delete", (req, res) => {
 });
 app.post("/auditiontable/countRatio", (req, res) => {
   countRatio(req, res);
+});
+// 学生相关的table
+app.post("/student/add", (req, res) => {
+  addStudent(req, res);
+});
+app.post("/student/search", (req, res) => {
+  searchStudent(req, res);
+});
+app.post("/student/edit", (req, res) => {
+  editStudent(req, res);
+});
+app.post("/student/delete", (req, res) => {
+  deleteStudent(req, res);
+});
+app.post("/student/getStudentByClassId", (req, res) => {
+  getStudentByClassId(req, res);
 });
 // 新建存放临时文件的文件夹
 const upload_tmp = multer({ dest: "upload_tmp/" });

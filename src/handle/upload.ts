@@ -13,9 +13,9 @@ export async function getExcelTemplate(req: any, res: Response) {
       "星期",
       "ClassTime",
       "classes",
-      "classroom",
       "teacher",
       "content",
+      "classroom",
       "updatePRPackage",
       "remarks",
       "容纳试听人数",
@@ -27,9 +27,9 @@ export async function getExcelTemplate(req: any, res: Response) {
       "1",
       "08:00 - 09:00",
       "班级",
-      "教室",
-      "中教 & 外教(如果不写按默认设定老师记录)",
+      "外教 & 中教",
       "课程内容",
+      "教室",
       "更新点读包",
       "备注",
       "3",
@@ -87,11 +87,11 @@ export async function uploadExcel(req: any, res: Response) {
             endTimeStr[1]
           ).getTime();
           const classes = data[i][3];
-          const classroom = data[i][4];
-          const teacher = data[i][5].split("&");
-          const teacher1 = teacher[0];
-          const teacher2 = teacher[1];
-          const content = data[i][6];
+          const teacher = data[i][4].split("&"); // 分为外教和中教，
+          const teacher1 = teacher[1].trim() || "";
+          const teacher2 = teacher[0].trim() || "";
+          const content = data[i][5];
+          const classroom = data[i][6];
           const updatePRPackage = data[i][7];
           const remarks = data[i][8];
           const auditions_num = data[i][9];

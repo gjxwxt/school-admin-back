@@ -30,20 +30,6 @@ module.exports = {
       },
     },
     {
-      path: "/student_management",
-      name: "student_management",
-      component: "/student_management/index",
-      meta: {
-        icon: "Histogram",
-        title: "学生管理",
-        isLink: "",
-        isHide: false,
-        isFull: false,
-        isAffix: false,
-        isKeepAlive: true,
-      },
-    },
-    {
       path: "/class_management",
       name: "class_management",
       redirect: "/class_management/schedule_management",
@@ -66,6 +52,21 @@ module.exports = {
             title: "班级列表",
             isLink: "",
             isHide: false,
+            isFull: false,
+            isAffix: false,
+            isKeepAlive: true,
+          },
+        },
+        {
+          path: "/class_management/student_management/:name",
+          name: "student_management",
+          component: "/class_management/student_management/index",
+          meta: {
+            icon: "Histogram",
+            title: "班级详情",
+            isLink: "",
+            isHide: false,
+            // activeMenu: "/class_management/student_management",
             isFull: false,
             isAffix: false,
             isKeepAlive: true,
@@ -98,7 +99,7 @@ module.exports = {
             isAffix: false,
             isKeepAlive: true,
           },
-        }
+        },
       ],
     },
     {
