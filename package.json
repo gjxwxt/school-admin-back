@@ -1,7 +1,7 @@
 {
   "name": "pure-admin-backend",
   "version": "lastest",
-  "description": "pure-admin官方后端",
+  "description": "加朗教育官方后端",
   "scripts": {
     "start": "nodemon --config nodemon.json src/server.ts"
   },

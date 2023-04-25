@@ -15,7 +15,7 @@ export default {
   options: {
     swaggerDefinition: {
       info: {
-        description: "pure-admin官方后端",
+        description: "加朗教育官方后端",
         title: "Swagger",
         version: require("../../package.json").version,
       },
@@ -54,7 +54,7 @@ export default {
     host: "localhost",
     charset: "utf8_general_ci",
     user: "root",
-    password: "gaojiaxiang",
+    password: "gaojiaxiang.123",
   },
   mongodb: {},
   sqlite: {},
