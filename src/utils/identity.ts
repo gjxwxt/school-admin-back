@@ -9,13 +9,13 @@ export async function getIdentityMenu(identity): Promise<object> {
         case 'admin':
             file = dynamicRouter;
             break;
-        case 'classManager':
-            file = classManagerRouter;
+        case 'operator':
+            file = dynamicRouter;
             break;
-        case 'Directors':
-            file = DirectorsRouter;
+        case 'campus_admin':
+            file = OperatorsRouter;
             break;
-        case 'Operators':
+        case 'campus_operator':
             file = OperatorsRouter;
             break;
         default:

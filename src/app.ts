@@ -32,11 +32,6 @@ class App {
           path: [
             "/login",
             "/register",
-            "/category",
-            /^\/category\/.*/,
-            "/comingshop",
-            /^\/detail\/.*/,
-            "/auditiontable/countRatio"
           ],
         })
     );

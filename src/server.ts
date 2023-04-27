@@ -43,7 +43,7 @@ import {
   searchPage,
   searchVague,
   upload,
-  captcha,
+  captcha, editUser, changePassword,
 } from "./handle/login";
 import {
   addNewsSchedule,
@@ -104,8 +104,16 @@ app.post("/register", (req, res) => {
   register(req, res);
 });
 
+app.post("/changePassword", (req, res) => {
+  changePassword(req, res);
+});
+
 app.post("/user/list", (req, res) => {
   getUserList(req, res);
+});
+// 编辑用户接口
+app.post("/user/edit", (req, res) => {
+  editUser(req, res);
 });
 
 app.post("/user/export", (req, res) => {

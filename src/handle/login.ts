@@ -63,7 +63,7 @@ const login = async (req: Request, res: Response) => {
   /** 登录传进来的一定是md5加密过的数据*/
   const { username, password } = req.body;
   let sql: string =
-    "select * from users where username=" + "'" + username + "'";
+    "select * from users where status = 1 and phone_number=" + "'" + username + "'";
   connection.query(sql, async function (err, data: any) {
     /** 没找到登陆时输入的用户*/
     if (data.length == 0) {
@@ -80,41 +80,24 @@ const login = async (req: Request, res: Response) => {
       ) {
         const accessToken = jwt.sign(
           {
-            accountId: data[0].username,
+            accountId: data[0].phone_number,
             role: data[0].role,
           },
           secret.jwtSecret,
           { expiresIn }
         );
-        if (username === "admin") {
-          await res.json({
-            success: true,
-            data: {
-              message: Message[2],
-              username,
-              // 这里模拟角色，根据自己需求修改
-              roles: ["admin"],
-              access_token: accessToken,
-              // 这里模拟刷新token，根据自己需求修改
-              refreshToken: "eyJhbGciOiJIUzUxMiJ9.adminRefresh",
-              expires: new Date(new Date()).getTime() + expiresIn,
-            },
-          });
-        } else {
-          await res.json({
-            success: true,
-            data: {
-              message: Message[2],
-              username,
-              // 这里模拟角色，根据自己需求修改
-              roles: [data[0].role],
-              access_token: accessToken,
-              // 这里模拟刷新token，根据自己需求修改
-              refreshToken: "eyJhbGciOiJIUzUxMiJ9.adminRefresh",
-              expires: new Date(new Date()).getTime() + expiresIn,
-            },
-          });
-        }
+        await res.json({
+          success: true,
+          data: {
+            message: Message[2],
+            access_token: accessToken,
+            role: data[0].role,
+            phone_number: data[0].phone_number,
+            // 这里模拟刷新token，根据自己需求修改
+            refreshToken: "eyJhbGciOiJIUzUxMiJ9.adminRefresh",
+            expires: new Date(new Date()).getTime() + expiresIn,
+          },
+        });
       } else {
         /** 密码错误 */
         await res.json({
@@ -155,7 +138,7 @@ const login = async (req: Request, res: Response) => {
  */
 
 const register = async (req: Request, res: Response) => {
-  const { username, password, role } = req.body;
+  const { username,phone_number, password, role, campus = "" } = req.body;
   /** 如果密码长度小于6*/
   if (password.length < 6)
     return res.json({
@@ -164,7 +147,7 @@ const register = async (req: Request, res: Response) => {
     });
   /** 看看username是否被注册了*/
   let sql: string =
-    "select * from users where username=" + "'" + username + "'";
+    "select * from users where phone_number=" + "'" + phone_number + "'";
   connection.query(sql, async (err, data: any) => {
     if (data.length > 0) {
       await res.json({
@@ -173,14 +156,14 @@ const register = async (req: Request, res: Response) => {
       });
     } else {
       /** 没人注册且密码长度>6时进行注册，判断前端传过来的数据是不是md5加密过的，所以直接存入数据库*/
-      let sql: string = `insert into users (username,password,role) value (?,?,?)`;
+      let sql: string = `insert into users (username,phone_number,password,role,campus) value (?,?,?,?,?)`;
       let newPassword =
         password.length >= 32
           ? password
           : createHash("md5").update(password).digest("hex");
       connection.query(
         sql,
-        [username, newPassword, role],
+        [username, phone_number, newPassword, role, campus],
         async function (err) {
           if (err) {
             Logger.error(err);
@@ -196,10 +179,72 @@ const register = async (req: Request, res: Response) => {
   });
 };
 
+// 修改用户密码
+const changePassword = async (req: any, res: Response) => {
+    let { oldPassword, newPassword } = req.body;
+    oldPassword =
+        oldPassword.length >= 32
+            ? oldPassword
+            : createHash("md5").update(oldPassword).digest("hex");
+    let phone_number = req.auth.accountId;
+    // 首先判断旧密码是否正确
+    let sql: string = `select * from users where phone_number = ?`;
+    connection.query(sql, [phone_number], async function (err, data: any) {
+        if (err) {
+            Logger.error(err);
+            res.json({
+              success: false,
+              data: { message: "操作失败" },
+            })
+        } else {
+            if (data.length > 0) {
+                if (data[0].password == oldPassword) {
+                    // 旧密码正确，修改密码
+                    await updatePassword(newPassword, phone_number, res);
+                } else {
+                    // 旧密码错误
+                    await res.json({
+                      success: false,
+                      data: { message: "旧密码错误" },
+                    });
+                }
+            } else {
+                await res.json({
+                  success: false,
+                  data: { message: "操作失败" },
+                });
+            }
+        };
+    });
+};
+
+// 修改密码
+const updatePassword = async (password: string, phone_number: string, res: Response) => {
+  let sql: string = `update users set password = ? where phone_number = ?`;
+  let newPassword =
+      password.length >= 32
+          ? password
+          : createHash("md5").update(password).digest("hex");
+  connection.query(sql, [newPassword, phone_number], async function (err) {
+    if (err) {
+      Logger.error(err);
+      res.json({
+        success: false,
+        data: { message: "操作失败" },
+      })
+    } else {
+      await res.json({
+        success: true,
+        data: { message: "操作成功" },
+      });
+    }
+  });
+};
+
 // 获取菜单列表，根据登录人员的身份返回数据。后面的接口中可以根据token来判断身份，进而返回不同内容
 const getMenu = async (req: any, res: Response) => {
   let identity = req.auth.role;
-  // 不同身份的人返回不同的路由页面
+    // 不同身份的人返回不同的路由页面
   res.send(await getIdentityMenu(identity));
 };
 const getButton = async (req: Request, res: Response) => {
@@ -207,189 +252,58 @@ const getButton = async (req: Request, res: Response) => {
 };
 
 const getUserList = async (req: Request, res: Response) => {
-  let users = {
-    code: 200,
-    msg: "成功",
-    data: {
-      list: [
-        {
-          id: "568668428175172767",
-          username: "陆娟",
-          campus: 2,
-          user: {
-            detail: {
-              age: 26,
-            },
-          },
-          age: 26,
-          classHour: "120",
-          email: "t.lxmxre@crsspeoqg.td",
-          className: "101",
-          createTime: "2019-08-22 06:09:02",
-          status: 0,
-          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
-        },
-        {
-          id: "864359270394668547",
-          username: "吕霞",
-          campus: 2,
-          user: {
-            detail: {
-              age: 23,
-            },
-          },
-          age: 23,
-          classHour: "123",
-          email: "p.rklwowgt@eitwlefs.ph",
-          className: "101",
-          createTime: "1984-01-14 22:33:44",
-          status: 1,
-          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
-        },
-        {
-          id: "630412577603789220",
-          username: "尹刚",
-          campus: 1,
-          user: {
-            detail: {
-              age: 26,
-            },
-          },
-          age: 26,
-          classHour: "123",
-          email: "y.qhoaepzq@jcrkcdc.gy",
-          className: "102",
-          createTime: "2022-01-29 01:43:10",
-          status: 1,
-          avatar: "https://i.imgtg.com/2023/01/16/QRqMK.jpg",
-        },
-        {
-          id: "553812343145788464",
-          username: "毛桂英",
-          campus: 1,
-          user: {
-            detail: {
-              age: 22,
-            },
-          },
-          age: 22,
-          classHour: "123",
-          email: "x.urmqegv@kecbm.gm",
-          className: "102",
-          createTime: "1985-02-19 14:21:44",
-          status: 0,
-          avatar: "https://i.imgtg.com/2023/01/16/QRqMK.jpg",
-        },
-        {
-          id: "292574518261001683",
-          username: "许娜",
-          campus: 1,
-          user: {
-            detail: {
-              age: 12,
-            },
-          },
-          age: 12,
-          classHour: "123",
-          email: "z.lmdoffxf@uvsiqubcvw.gn",
-          className: "101",
-          createTime: "1984-12-21 14:57:03",
-          status: 1,
-          avatar: "https://i.imgtg.com/2023/01/16/QRqMK.jpg",
-        },
-        {
-          id: "664369828507435489",
-          username: "邓秀兰",
-          campus: 2,
-          user: {
-            detail: {
-              age: 19,
-            },
-          },
-          age: 19,
-          classHour: "123",
-          email: "i.inrajkwcj@csknklk.ni",
-          className: "101",
-          createTime: "2012-10-28 18:24:58",
-          status: 0,
-          avatar: "https://i.imgtg.com/2023/01/16/QRqMK.jpg",
-        },
-        {
-          id: "775133483698306865",
-          username: "侯娟",
-          campus: 2,
-          user: {
-            detail: {
-              age: 21,
-            },
-          },
-          age: 21,
-          classHour: "123",
-          email: "p.pfzikttpi@hkwhmad.gw",
-          className: "101",
-          createTime: "2017-07-30 19:54:06",
-          status: 0,
-          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
-        },
-        {
-          id: "424339324332823816",
-          username: "刘超",
-          campus: 1,
-          user: {
-            detail: {
-              age: 18,
-            },
-          },
-          age: 18,
-          classHour: "123",
-          email: "e.hemdj@xdqmw.vc",
-          className: "101",
-          createTime: "1986-04-16 11:26:50",
-          status: 1,
-          avatar: "https://i.imgtg.com/2023/01/16/QRa0s.jpg",
-        },
-        {
-          id: "661764073433891321",
-          username: "罗平",
-          campus: 1,
-          user: {
-            detail: {
-              age: 11,
-            },
-          },
-          age: 11,
-          classHour: "123",
-          email: "v.qenmvyhg@qqv.mn",
-          className: "102",
-          createTime: "1984-02-02 04:17:57",
-          status: 0,
-          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
-        },
-        {
-          id: "408651339919580773",
-          username: "郑丽",
-          campus: 2,
-          user: {
-            detail: {
-              age: 24,
-            },
-          },
-          age: 24,
-          classHour: "123",
-          email: "b.sbjq@prnamtncpt.wf",
-          className: "101",
-          createTime: "1999-03-06 05:12:50",
-          status: 1,
-          avatar: "https://i.imgtg.com/2023/01/16/QRBHS.jpg",
-        },
-      ],
-      pageNum: 1,
-      pageSize: 10,
-      total: 2000,
-    },
-  };
-  res.send(users);
+    let { page, campus = "", username = "" } = req.body;
+    page = (page-1)*7;
+    // 先获取到所有用户的数量，之后根据分页获取用户列表、
+    connection.query(`select count(*) as total from users where campus like '%${campus}%' ${username ? `and username like '%${username}%'` : ''}`, async function (err, resu: any) {
+        if (err) {
+            Logger.error(err);
+        } else {
+          let sql: string = `select * from users where campus like '%${campus}%' ${username ? `and username like '%${username}%'` : ''} order by create_time desc limit ${page},7`;
+          connection.query(sql, async function (err, result: any) {
+            if (err) {
+              Logger.error(err);
+            } else {
+              result[0] ? result[0].total = resu[0].total : "";
+              await res.json({
+                code: 200,
+                success: true,
+                data: result
+              });
+            }
+          })
+        }
+    })
 };
+
+// 编辑用户详情
+const editUser = async (req: Request, res: Response) => {
+  const {id,username, phone_number, role, campus = "", status = 1} = req.body;
+  /** 看看username是否被注册了*/
+  let sql: string =
+      "select id from users where phone_number=" + "'" + phone_number + "'";
+  connection.query(sql, async (err, data: any) => {
+    if (data[0].id !== id) {
+      await res.json({
+        success: false,
+        data: {message: Message[5]},
+      });
+    } else {
+        let sql = `update users set username=?,phone_number=?,role=?,campus=?,status=? where id=?`;
+        connection.query(sql, [username, phone_number, role, campus,status, id], async function (err) {
+          if (err) {
+            Logger.error(err);
+          } else {
+            await res.json({
+              success: true,
+              data: {message: Message[6]},
+            });
+          }
+        });
+    }
+  })
+};
+
 // 有个注意的点就是，尽量不要层级太深，非得user.detail.age才能拿到age
 const epxortUsers = async (req, res) => {
   let arr = [
@@ -685,9 +599,11 @@ const captcha = async (req: Request, res: Response) => {
 export {
   login,
   register,
+  changePassword,
   getMenu,
   getButton,
   getUserList,
+  editUser,
   epxortUsers,
   updateList,
   deleteList,

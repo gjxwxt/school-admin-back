@@ -24,11 +24,11 @@ export async function  addTeacher(req: any, res: Response) {
         }
     );
 }
-/** 根据校区搜索老师 */
+/** 根据校区和搜索老师 */
 export async function searchTeacher(req: any, res: Response) {
-    const { campus } = req.body;
+    const { campus, type = "" } = req.body;
     connection.query(
-        `select * from teachers where campus = ?`,
+        `select * from teachers where campus = ? ${ type !== "" ? type == 1 ? "and teacher_category = '中教'" : "and teacher_category = '外教'":"" }`,
         [campus],
         async function (err,result){
             if (err){

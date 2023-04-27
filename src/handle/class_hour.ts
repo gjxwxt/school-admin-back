@@ -10,13 +10,12 @@ export function operateClassHour(req: any, res: Response) {
   // 传过来是数组，就需要开启事务，一起提交，如果失败，就回滚
   connection.beginTransaction(function (err) {
     if (err) {
-      Logger.error(err);
-      res.json({
-        success: false,
-        data: { message: "开启事务失败" },
-      });
       return connection.rollback(function () {
-        throw err;
+          Logger.error(err);
+          res.json({
+              success: false,
+              data: { message: "开启事务失败" },
+          });
       });
     } else {
       // 将数组中的每一项都插入到数据库中，如果有一项插入失败，就回滚。item中包括：class_id, student_id, student_name, type, operate_num, before_class_hour, remarks, operator
@@ -38,13 +37,12 @@ export function operateClassHour(req: any, res: Response) {
           ],
            function (err) {
             if (err) {
-              Logger.error(err);
-              res.json({
-                success: false,
-                data: { message: "插入操作失败" },
-              });
               return connection.rollback(function () {
-                throw err;
+                  Logger.error(err);
+                  res.json({
+                      success: false,
+                      data: { message: "插入操作失败" },
+                  });
               });
             } else {
               // 修改学生表中的课时
@@ -53,13 +51,12 @@ export function operateClassHour(req: any, res: Response) {
                     [item.type = 1 ? item.before_class_hour - item.operate_num : item.before_class_hour + item.operate_num, item.student_id],
                     function (err) {
                         if (err) {
-                            Logger.error(err);
-                            res.json({
-                                success: false,
-                                data: { message: "修改学生课时失败" },
-                            });
                             return connection.rollback(function () {
-                                throw err;
+                                Logger.error(err);
+                                res.json({
+                                    success: false,
+                                    data: { message: "修改学生课时失败" },
+                                });
                             });
                         }
                     }
@@ -88,7 +85,7 @@ export function operateClassHour(req: any, res: Response) {
 export async function searchClassHourOperate(req: any, res: Response) {
     const { student_id } = req.body;
     connection.query(
-        "select * from class_hour_operate where student_id = ?",
+        "select * from class_hour_operate where student_id = ? order by create_time desc",
         [student_id],
         function (err, result) {
             if (err) {

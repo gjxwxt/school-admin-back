@@ -25,6 +25,8 @@ export async function  addCampus(req: any, res: Response) {
 }
 
 export async function searchCampus(req: any, res: Response) {
+    // 如果req.auth.role是admin或者operator，就可以查看所有的校区
+    if (req.auth.role === "admin" || req.auth.role === "operator") {
     connection.query(
         `select * from campus`,
         async function (err,result){
@@ -40,7 +42,26 @@ export async function searchCampus(req: any, res: Response) {
                 })
             }
         }
-    )
+    )}else{
+        // 如果req.auth.role不是admin或者operator，就只能查看自己的校区
+        connection.query(
+            `select campus from users where phone_number = ?`,
+            [req.auth.accountId],
+            async function (err,result){
+                if (err){
+                    Logger.error(err);
+                    await res.json({
+                        success:false
+                    })
+                }else{
+                    await res.json({
+                        success:true,
+                        data:result
+                    })
+                }
+            }
+        )
+    }
 }
 
 export async function  editCampus(req: any, res: Response) {

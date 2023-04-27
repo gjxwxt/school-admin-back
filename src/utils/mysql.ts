@@ -17,6 +17,6 @@ export function queryTableUser(s: string): void {
     err ? Logger.error(err) : Logger.info(`${s}表创建成功`);
   });
   /** 项目初始化的时候会首先向user表中添加admin用户 */
-  insertUser('admin','123456','admin')
+  insertUser('admin','admin','123456','admin')
 }
 
