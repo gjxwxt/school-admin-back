@@ -128,4 +128,63 @@ export async function uploadExcel(req: any, res: Response) {
       });
     }
   });
+};
+
+// 将传过来的student_id和图片地址插入到contract表中
+export async function uploadContract(req: any, res: Response) {
+  const { student_id, img_url } = req.body;
+    try {
+        connection.query(
+            `insert into contract (student_id, contract_img) values (?,?)`,
+            [student_id, img_url],
+            async function (err,result){
+              if (err){
+                Logger.error(err);
+                await res.json({
+                  success:false
+                })
+              }else{
+                await res.json({
+                  success:true
+                })
+              }
+            }
+        );
+    }
+    catch {
+        await res.json({
+            success: false,
+            data: { message: "合同添加失败" },
+        });
+    }
+}
+
+// 将传过来的student_id去contract表拿到对应的图片地址
+export async function getContract(req: any, res: Response) {
+  const { student_id } = req.body;
+    try {
+        connection.query(
+            `select contract_img from contract where student_id = ?`,
+            [student_id],
+            async function (err,result){
+              if (err){
+                Logger.error(err);
+                await res.json({
+                  success:false
+                })
+              }else{
+                await res.json({
+                  success:true,
+                  data:result[0]
+                })
+              }
+            }
+        );
+    }
+    catch {
+        await res.json({
+            success: false,
+            data: { message: "合同查询失败" },
+        });
+    }
 }

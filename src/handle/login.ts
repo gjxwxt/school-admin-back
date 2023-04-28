@@ -93,6 +93,7 @@ const login = async (req: Request, res: Response) => {
             access_token: accessToken,
             role: data[0].role,
             phone_number: data[0].phone_number,
+            username: data[0].username,
             // 这里模拟刷新token，根据自己需求修改
             refreshToken: "eyJhbGciOiJIUzUxMiJ9.adminRefresh",
             expires: new Date(new Date()).getTime() + expiresIn,
@@ -546,6 +547,7 @@ const upload = async (req: Request, res: Response) => {
                 result.push({
                   filename: req.files[filesLength - 1].originalname,
                   filepath: utils.getAbsolutePath(des_file(filesLength - 1)),
+                  fileUrl: "/files/" + req.files[filesLength - 1].originalname,
                 });
                 filesLength--;
               }
@@ -567,7 +569,8 @@ const upload = async (req: Request, res: Response) => {
         },
       });
     })
-    .catch(() => {
+    .catch((err) => {
+      Logger.error(err);
       res.json({
         success: false,
         data: {

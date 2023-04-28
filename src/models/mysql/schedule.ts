@@ -44,7 +44,7 @@ const student =
 
 // 创建一个专门存贮合同图片的表，包括合同id，图片二进制，学员id，创建时间，更新时间
 const contract =
-  "CREATE TABLE if not EXISTS contract(contract_id int PRIMARY key auto_increment,contract_img longblob,student_id int,create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
+  "CREATE TABLE if not EXISTS contract(contract_id int PRIMARY key auto_increment,contract_img varchar(255),student_id int,create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
 
 // 对课时的操作，需要记录下操作人，操作时间，课程id，学生id，学生姓名，操作类型（扣还是加），操作数量（扣/加了多少），操作前课时，操作后课时，备注
 // 创建一个表，参数是class_id, student_id, student_name, type, operate_num, before_class_hour, remarks, operator

@@ -87,7 +87,7 @@ import {
   searchClassManage,
   searchClassName,
 } from "./handle/classMangage";
-import { getExcelTemplate, uploadExcel } from "./handle/upload";
+import {getContract, getExcelTemplate, uploadContract, uploadExcel} from "./handle/upload";
 import {
   addStudent,
   deleteStudent,
@@ -270,11 +270,17 @@ app.post("/student/delete", (req, res) => {
 app.post("/student/getStudentByClassId", (req, res) => {
   getStudentByClassId(req, res);
 });
+app.post("/student/uploadContract", (req, res) => {
+  uploadContract(req, res);
+})
 // 新建存放临时文件的文件夹
 const upload_tmp = multer({ dest: "upload_tmp/" });
 app.post("/upload", upload_tmp.any(), (req, res) => {
   upload(req, res);
 });
+app.post("/student/getContract", (req, res) => {
+    getContract(req, res);
+})
 
 app.get("/captcha", (req, res) => {
   captcha(req, res);
