@@ -4,7 +4,7 @@
   "description": "加朗教育官方后端",
   "scripts": {
     "start": "nodemon --config nodemon.json src/server.ts",
-    "pm2": "tsc src/server.ts && pm2 start src/server.js --name pure-admin-backend",
+    "pm2": "tsc src/server.ts && pm2 start src/server.js --name pure-admin-backend"
   },
   "author": "gaojiaxiang",
   "license": "ISC",
