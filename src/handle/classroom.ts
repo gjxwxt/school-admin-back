@@ -66,6 +66,12 @@ export async function  editClassRoom(req: any, res: Response) {
         `select * from classroom where campus = ? and classroom = ?`,
         [campus,classroom],
         async function (err,result){
+            if (err){
+                Logger.error(err);
+                await res.json({
+                    success:false
+                })
+            }
             // 如果没有找到相同的数据，才插入进去
             if (!result[0]){
                 connection.query(

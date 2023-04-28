@@ -65,6 +65,12 @@ const login = async (req: Request, res: Response) => {
   let sql: string =
     "select * from users where status = 1 and phone_number=" + "'" + username + "'";
   connection.query(sql, async function (err, data: any) {
+    if (err){
+      Logger.error(err);
+      await res.json({
+        success:false
+      })
+    }
     /** 没找到登陆时输入的用户*/
     if (data.length == 0) {
       await res.json({

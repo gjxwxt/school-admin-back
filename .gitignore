@@ -81,6 +81,8 @@ dist
 .idea
 docs
 
+*.js
+
 .DS_Store
 upload_tmp
 public/files/
