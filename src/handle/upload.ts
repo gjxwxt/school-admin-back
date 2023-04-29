@@ -134,22 +134,55 @@ export async function uploadExcel(req: any, res: Response) {
 export async function uploadContract(req: any, res: Response) {
   const { student_id, img_url } = req.body;
     try {
+        // 先查询是否有该学生的合同，有的话就更新，没有就插入
         connection.query(
-            `insert into contract (student_id, contract_img) values (?,?)`,
-            [student_id, img_url],
-            async function (err,result){
-              if (err){
-                Logger.error(err);
-                await res.json({
-                  success:false
-                })
-              }else{
-                await res.json({
-                  success:true
-                })
-              }
-            }
-        );
+            `select * from contract where student_id = ?`,
+            [student_id],
+            async function (err,result:any){
+                if (err){
+                    Logger.error(err);
+                    await res.json({
+                        success:false
+                    })
+                }else{
+                    console.log(result);
+                    if (result.length > 0){
+                        connection.query(
+                            `update contract set contract_img = ? where student_id = ?`,
+                            [img_url, student_id],
+                            async function (err,result){
+                                if (err){
+                                    Logger.error(err);
+                                    await res.json({
+                                        success:false
+                                    })
+                                }else{
+                                    await res.json({
+                                        success:true
+                                    })
+                                }
+                            }
+                        )
+                    }else{
+                        connection.query(
+                            `insert into contract (student_id, contract_img) values (?,?)`,
+                            [student_id, img_url],
+                            async function (err){
+                                if (err){
+                                    Logger.error(err);
+                                    await res.json({
+                                        success:false
+                                    })
+                                }else{
+                                    await res.json({
+                                        success:true
+                                    })
+                                }
+                            }
+                        );
+                    }
+                }
+            })
     }
     catch {
         await res.json({
