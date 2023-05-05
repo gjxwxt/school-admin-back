@@ -49,7 +49,7 @@ const contract =
 // 对课时的操作，需要记录下操作人，操作时间，课程id，学生id，学生姓名，操作类型（扣还是加），操作数量（扣/加了多少），操作前课时，操作后课时，备注
 // 创建一个表，参数是class_id, student_id, student_name, type, operate_num, before_class_hour, remarks, operator
 const classHour_operate =
-  "CREATE TABLE if not EXISTS class_hour_operate(operation_id int PRIMARY key auto_increment,campus varchar(32),class_id int,class_name varchar(20),student_id int,student_name varchar(20),type int,operate_num int,before_class_hour decimal(5,2),after_class_hour decimal(5,2),remarks varchar(32),operator varchar(20),create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
+  "CREATE TABLE if not EXISTS class_hour_operate(operation_id int PRIMARY key auto_increment,campus varchar(32),class_id int,class_name varchar(20),student_id int,student_name varchar(20),type int,operate_num float,before_class_hour decimal(5,2),after_class_hour decimal(5,2),remarks varchar(32),operator varchar(20),create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
 
 export {
   schedule,
