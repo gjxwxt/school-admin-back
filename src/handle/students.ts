@@ -113,6 +113,28 @@ export async function getStudentByClassId(req: any, res: Response) {
   );
 }
 
+// 根据class_name和campus查询学生信息
+export function getStudentByClassName(req: any, res: Response) {
+  const { class_name, campus } = req.body;
+  connection.query(
+    `select * from students where class_name = ? and campus = ? and status = 1 order by create_time`,
+    [class_name, campus],
+    function (err, result) {
+      if (err) {
+        Logger.error(err);
+        res.json({
+          success: false,
+        });
+      } else {
+        res.json({
+          success: true,
+          data: result,
+        });
+      }
+    }
+  );
+}
+
 export async function editStudent(req: any, res: Response) {
   // 根据id进行删除,然后重新插入数据
   const {

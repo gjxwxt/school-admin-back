@@ -43,7 +43,9 @@ import {
   searchPage,
   searchVague,
   upload,
-  captcha, editUser, changePassword,
+  captcha,
+  editUser,
+  changePassword,
 } from "./handle/login";
 import {
   addNewsSchedule,
@@ -87,14 +89,21 @@ import {
   searchClassManage,
   searchClassName,
 } from "./handle/classMangage";
-import {getContract, getExcelTemplate, uploadContract, uploadExcel} from "./handle/upload";
+import {
+  getContract,
+  getExcelTemplate,
+  uploadContract,
+  uploadExcel,
+} from "./handle/upload";
 import {
   addStudent,
   deleteStudent,
-  editStudent, getStudentByClassId,
+  editStudent,
+  getStudentByClassId,
+  getStudentByClassName,
   searchStudent,
 } from "./handle/students";
-import {operateClassHour, searchClassHourOperate} from "./handle/class_hour";
+import { operateClassHour, searchClassHourOperate } from "./handle/class_hour";
 
 app.post("/login", (req, res) => {
   login(req, res);
@@ -270,17 +279,20 @@ app.post("/student/delete", (req, res) => {
 app.post("/student/getStudentByClassId", (req, res) => {
   getStudentByClassId(req, res);
 });
+app.post("/student/getStudentByClassName", (req, res) => {
+  getStudentByClassName(req, res);
+});
 app.post("/student/uploadContract", (req, res) => {
   uploadContract(req, res);
-})
+});
 // 新建存放临时文件的文件夹
 const upload_tmp = multer({ dest: "upload_tmp/" });
 app.post("/upload", upload_tmp.any(), (req, res) => {
   upload(req, res);
 });
 app.post("/student/getContract", (req, res) => {
-    getContract(req, res);
-})
+  getContract(req, res);
+});
 
 app.get("/captcha", (req, res) => {
   captcha(req, res);
