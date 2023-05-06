@@ -1,7 +1,7 @@
 /** 创建课程表,当第一次初始化的时候会 */
 /** 创建课程表，week:0~6代表星期几，campus表示哪个校区，startTime课程开始时间，endTime课程结束时间，class班级，teacher，content字符串，update更新点读包，remark*/
 const schedule =
-  "CREATE TABLE if not EXISTS schedules(id int PRIMARY key auto_increment,weeks int(5),campus varchar(32),startTime BIGINT NOT NULL,endTime BIGINT NOT NULL,teacher1 varchar(32),teacher2 varchar(32),content varchar(32),classes varchar(32),class_id int,classroom varchar(32),updatePRPackage varchar(32),remarks varchar(32),auditions_num varchar(5),age_range varchar(20),create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
+  "CREATE TABLE if not EXISTS schedules(id int PRIMARY key auto_increment,weeks int(5),campus varchar(32),startTime BIGINT NOT NULL,endTime BIGINT NOT NULL,teacher1 varchar(32),teacher2 varchar(32),content varchar(32),classes varchar(32),class_id int,classroom varchar(32),updatePRPackage varchar(255),remarks varchar(255),auditions_num varchar(5),age_range varchar(20),create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
 
 /** 创建校区表,当第一次初始化的时候会 */
 /** 存储校区的详细信息，地址，电话， */
@@ -40,7 +40,7 @@ const AuditionTable =
  * 创建学生表,包括学生姓名 student_name、年龄 student_age、校区 campus、班级 classes_id、课时 class_hour 、联系方式 student_contact 、来源 student_source、签订合同的话直接往合同表里插入学员id、创建时间和更新时间、备注remarks
  */
 const student =
-  "CREATE TABLE if not EXISTS students(student_id int PRIMARY key auto_increment,class_hour decimal(5,2) NOT NULL,init_class_hour decimal(5,2) NOT NULL,student_name varchar(20) NOT NULL,campus varchar(32) NOT NULL,student_age varchar(10),class_id int,class_name varchar(20),student_contact varchar(20),student_source varchar(20),remarks varchar(32),status int NOT NULL DEFAULT 1,create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
+  "CREATE TABLE if not EXISTS students(student_id int PRIMARY key auto_increment,class_hour decimal(5,2) NOT NULL,init_class_hour decimal(5,2) NOT NULL,student_name varchar(20) NOT NULL,campus varchar(32) NOT NULL,student_age varchar(10),class_id int,class_name varchar(20),student_contact varchar(20),student_source varchar(20),remarks varchar(255),status int NOT NULL DEFAULT 1,create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
 
 // 创建一个专门存贮合同图片的表，包括合同id，图片二进制，学员id，创建时间，更新时间
 const contract =
@@ -49,7 +49,7 @@ const contract =
 // 对课时的操作，需要记录下操作人，操作时间，课程id，学生id，学生姓名，操作类型（扣还是加），操作数量（扣/加了多少），操作前课时，操作后课时，备注
 // 创建一个表，参数是class_id, student_id, student_name, type, operate_num, before_class_hour, remarks, operator
 const classHour_operate =
-  "CREATE TABLE if not EXISTS class_hour_operate(operation_id int PRIMARY key auto_increment,campus varchar(32),class_id int,class_name varchar(20),student_id int,student_name varchar(20),type int,operate_num float,before_class_hour decimal(5,2),after_class_hour decimal(5,2),remarks varchar(32),operator varchar(20),create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
+  "CREATE TABLE if not EXISTS class_hour_operate(operation_id int PRIMARY key auto_increment,campus varchar(32),class_id int,class_name varchar(20),student_id int,student_name varchar(20),type int,operate_num float,before_class_hour decimal(5,2),after_class_hour decimal(5,2),remarks varchar(255),operator varchar(20),create_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',update_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间')";
 
 export {
   schedule,

@@ -25,7 +25,6 @@ export function operateClassHour(req: any, res: Response) {
             item.type == 1
               ? Number(item.before_class_hour) - item.operate_num
               : Number(item.before_class_hour) + item.operate_num;
-          console.log(after_num);
           connection.query(
             "insert into class_hour_operate(campus, class_id, class_name,student_id, student_name, type, operate_num, before_class_hour, after_class_hour, remarks, operator) values (?,?,?,?,?,?,?,?,?,?,?)",
             [
