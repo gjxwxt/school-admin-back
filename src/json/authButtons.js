@@ -4,7 +4,7 @@ module.exports ={
 		"useProTable": ["add", "batchAdd", "export", "batchDelete", "status"],
 		"authButton": ["add", "edit", "delete", "import", "export"],
 		// 格式就是 路由名称：按钮权限
-		"student_management": ["add", "batchAdd", "export", "batchDelete", "status"],
+		"student_management": ["add", "delete", "operation"],
 		"campus_management": ["add", "edit", "delete"],
 		"schedule_management": ["add", "edit", "delete", "batchAdd", "operate"],
 		"teacher_management": ["add", "edit", "delete"],

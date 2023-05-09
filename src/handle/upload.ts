@@ -185,7 +185,6 @@ export async function uploadContract(req: any, res: Response) {
                         success:false
                     })
                 }else{
-                    console.log(result);
                     if (result.length > 0){
                         connection.query(
                             `update contract set contract_img = ? where student_id = ?`,

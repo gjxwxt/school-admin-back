@@ -13,6 +13,7 @@ import * as path from "path";
 import { error } from "winston";
 import { getIdentityMenu } from "../utils/identity";
 const authButtons = require("../json/authButtons");
+const operator = require("../json/operator");
 
 const utils = require("@pureadmin/utils");
 
@@ -254,8 +255,26 @@ const getMenu = async (req: any, res: Response) => {
     // 不同身份的人返回不同的路由页面
   res.send(await getIdentityMenu(identity));
 };
-const getButton = async (req: Request, res: Response) => {
-  res.send(authButtons);
+const getButton = async (req: any, res: Response) => {
+  let identity = req.auth.role;
+  let file: {};
+  switch (identity){
+    case 'admin':
+      file = authButtons;
+      break;
+    case 'operator':
+      file = operator;
+      break;
+    case 'campus_admin':
+      file = authButtons;
+      break;
+    case 'campus_operator':
+      file = operator;
+      break;
+    default:
+      file = operator;
+  };
+  res.send(file);
 };
 
 const getUserList = async (req: Request, res: Response) => {
