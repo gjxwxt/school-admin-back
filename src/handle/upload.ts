@@ -13,7 +13,8 @@ export async function getExcelTemplate(req: any, res: Response) {
       "星期",
       "ClassTime",
       "classes",
-      "teacher",
+      "foreignTeacher",
+      "chineseTeacher",
       "content",
       "classroom",
       "updatePRPackage",
@@ -27,7 +28,8 @@ export async function getExcelTemplate(req: any, res: Response) {
       "1",
       "08:00 - 09:00",
       "班级",
-      "外教 & 中教",
+      "外教",
+      "中教",
       "课程内容",
       "教室",
       "更新点读包",
@@ -98,16 +100,15 @@ export async function uploadExcel(req: any, res: Response) {
                   endTimeStr[1]
               ).getTime();
               const classes = data[i][3];
-              const teacher = data[i][4].split("&"); // 分为外教和中教，
-              const teacher1 = teacher[1].trim() || "";
-              const teacher2 = teacher[0].trim() || "";
-              const content = data[i][5];
-              const classroom = data[i][6];
-              const updatePRPackage = data[i][7];
-              const remarks = data[i][8];
-              const auditions_num = data[i][9];
-              const age_range = data[i][10];
-              const campus = data[i][11];
+              const foreignTeacher = data[i][4];
+              const chineseTeacher = data[i][5];
+              const content = data[i][6];
+              const classroom = data[i][7];
+              const updatePRPackage = data[i][8];
+              const remarks = data[i][9];
+              const auditions_num = data[i][10];
+              const age_range = data[i][11];
+              const campus = data[i][12];
               connection.query(
                   `insert into schedules (startTime, endTime, weeks, campus, teacher1, teacher2, content, classes, classroom, updatePRPackage, remarks,auditions_num,age_range) values (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                   [
@@ -115,8 +116,8 @@ export async function uploadExcel(req: any, res: Response) {
                     endTime,
                     weeks == 7 ? 0 : weeks,
                     campus,
-                    teacher1,
-                    teacher2,
+                    chineseTeacher,
+                    foreignTeacher,
                     content,
                     classes,
                     classroom,
