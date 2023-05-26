@@ -100,8 +100,8 @@ export async function uploadExcel(req: any, res: Response) {
                   endTimeStr[1]
               ).getTime();
               const classes = data[i][3];
-              const foreignTeacher = data[i][4];
-              const chineseTeacher = data[i][5];
+              const foreignTeacher = data[i][4] || "";
+              const chineseTeacher = data[i][5] || "";
               const content = data[i][6];
               const classroom = data[i][7];
               const updatePRPackage = data[i][8];
